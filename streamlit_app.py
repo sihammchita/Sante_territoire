@@ -87,7 +87,9 @@ def load_all_data():
         return s
 
     # Population
-    pop = pd.read_csv("https://drive.google.com/uc?export=download&id=11rOLt12iXUxbEQTRlZlbuil_AEp2jxue", sep=";")
+    pop = pd.read_csv(
+    "https://drive.google.com/uc?export=download&id=11rOLt12iXUxbEQTRlZlbuil_AEp2jxue",
+    sep=";")    
     pop.columns = [c.replace('\r\n', ' ').strip() for c in pop.columns]
     pop["dept"] = pop["code_departement"].apply(norm_dept)
     for col in ["Population municipale", "Densité de population (en km²)",
@@ -108,7 +110,10 @@ def load_all_data():
     pop = pop.rename(columns=col_map)
 
     # Professionnels santé
-    pros = pd.read_csv("https://drive.google.com/uc?export=download&id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA", sep=";", low_memory=False)
+    pros = pd.read_csv(
+    "https://drive.google.com/uc?export=download&id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA",
+    sep=";",
+    low_memory=False)
     pros["dept"] = pros["code_departement"].apply(norm_dept)
     pros_dept = pros.groupby("dept").agg(
         nb_pros=("specialite_libelle", "count"),
