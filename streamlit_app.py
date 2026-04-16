@@ -87,7 +87,7 @@ def load_all_data():
         return s
 
     # Population
-    pop = pd.read_csv("https://drive.google.com/uc?id=11rOLt12iXUxbEQTRlZlbuil_AEp2jxue", sep=";")
+    pop = pd.read_csv("https://drive.google.com/uc?export=download&id=11rOLt12iXUxbEQTRlZlbuil_AEp2jxue", sep=";")
     pop.columns = [c.replace('\r\n', ' ').strip() for c in pop.columns]
     pop["dept"] = pop["code_departement"].apply(norm_dept)
     for col in ["Population municipale", "Densité de population (en km²)",
@@ -108,7 +108,7 @@ def load_all_data():
     pop = pop.rename(columns=col_map)
 
     # Professionnels santé
-    pros = pd.read_csv("https://drive.google.com/uc?id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA", sep=";", low_memory=False)
+    pros = pd.read_csv("https://drive.google.com/uc?export=download&id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA", sep=";", low_memory=False)
     pros["dept"] = pros["code_departement"].apply(norm_dept)
     pros_dept = pros.groupby("dept").agg(
         nb_pros=("specialite_libelle", "count"),
@@ -119,7 +119,7 @@ def load_all_data():
     ).reset_index()
 
     # Établissements
-    etabs = pd.read_csv("https://drive.google.com/uc?id=1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC", sep=";")
+    etabs = pd.read_csv("https://drive.google.com/uc?export=download&id=1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC", sep=";")
     etabs["dept"] = etabs["code_departement"].apply(norm_dept)
     etabs_dept = etabs.groupby("dept").agg(
         nb_etabs=("Rslongue", "count"),
@@ -128,7 +128,7 @@ def load_all_data():
     ).reset_index()
 
     # Temps d'accès
-    temps = pd.read_csv("https://drive.google.com/uc?id=1BoP_S7BYOvDKpwOhpFSEscTM31ltPEEa", sep=";")
+    temps = pd.read_csv("https://drive.google.com/uc?export=download&id=1BoP_S7BYOvDKpwOhpFSEscTM31ltPEEa", sep=";")
     temps["dept"] = temps["code_departement"].apply(norm_dept)
     temps_dept = temps.groupby("dept").agg(
         temps_acces_moyen=("temps_acces", "mean"),
@@ -138,7 +138,7 @@ def load_all_data():
     ).reset_index()
 
     # Immobilier
-    immo = pd.read_csv("https://drive.google.com/uc?id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
+    immo = pd.read_csv("https://drive.google.com/uc?export=download&id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
     immo["dept"] = immo["code_departement"].apply(norm_dept)
     immo_dept = immo.groupby("dept").agg(
         prix_m2_moyen=("prix_m2", "mean"),
@@ -147,13 +147,13 @@ def load_all_data():
     ).reset_index()
 
     # Environnement santé (par région)
-    env = pd.read_csv("https://drive.google.com/uc?id=1rfdxUJDSX5HzHStZgl5LTUPBoGF9V2i4", sep=";")
+    env = pd.read_csv("https://drive.google.com/uc?export=download&id=1rfdxUJDSX5HzHStZgl5LTUPBoGF9V2i4", sep=";")
     env.columns = ["Code_region", "nom_region", "enviro_score"]
     env["enviro_score"] = env["enviro_score"].astype(str).str.replace(",", ".").replace("nan", np.nan)
     env["enviro_score"] = pd.to_numeric(env["enviro_score"], errors="coerce")
 
     # Médicaments
-    medic = pd.read_csv("https://drive.google.com/uc?id=193dosn8DVXFgALvoWynssmxcs-8eNM82", sep=";")
+    medic = pd.read_csv("https://drive.google.com/uc?export=download&id=193dosn8DVXFgALvoWynssmxcs-8eNM82", sep=";")
     medic_summary = medic.groupby(["Statut", "Domaine(s) médical(aux)"]).size().reset_index(name="count")
 
     # ─── MASTER JOIN ───────────────────────────────────────────────────────────
@@ -675,7 +675,7 @@ with tabs[4]:
 
     # Top 10 prix par type
     st.markdown('<div class="section-title">🏙️ Prix par département — Maisons vs Appartements</div>', unsafe_allow_html=True)
-    immo_type = pd.read_csv("https://drive.google.com/uc?id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
+    immo_type = pd.read_csv("https://drive.google.com/uc?export=download&id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
     immo_type["dept"] = immo_type["code_departement"].astype(str).str.zfill(2)
     immo_type_dept = immo_type.groupby(["dept", "nom_departement", "type_local"])["prix_m2"].mean().reset_index()
     immo_type_dept = immo_type_dept.merge(df[["dept", "zone_short"]], on="dept", how="left")
