@@ -675,7 +675,7 @@ with tabs[4]:
 
     # Top 10 prix par type
     st.markdown('<div class="section-title">🏙️ Prix par département — Maisons vs Appartements</div>', unsafe_allow_html=True)
-    immo_type = pd.read_csv("data/immobilier_2025.csv", sep=";", low_memory=False)
+    immo_type = pd.read_csv("https://drive.google.com/uc?id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
     immo_type["dept"] = immo_type["code_departement"].astype(str).str.zfill(2)
     immo_type_dept = immo_type.groupby(["dept", "nom_departement", "type_local"])["prix_m2"].mean().reset_index()
     immo_type_dept = immo_type_dept.merge(df[["dept", "zone_short"]], on="dept", how="left")
