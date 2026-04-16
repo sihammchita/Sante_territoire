@@ -87,7 +87,7 @@ def load_all_data():
         return s
 
     # Population
-    pop = pd.read_csv(base + "population_2021.csv", sep=";")
+    pop = pd.read_csv("https://drive.google.com/uc?id=11rOLt12iXUxbEQTRlZlbuil_AEp2jxue", sep=";")
     pop.columns = [c.replace('\r\n', ' ').strip() for c in pop.columns]
     pop["dept"] = pop["code_departement"].apply(norm_dept)
     for col in ["Population municipale", "Densité de population (en km²)",
@@ -108,7 +108,7 @@ def load_all_data():
     pop = pop.rename(columns=col_map)
 
     # Professionnels santé
-    pros = pd.read_csv(base + "professionnels_sante_clean.csv", sep=";", low_memory=False)
+    pros = pd.read_csv("https://drive.google.com/uc?id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA", sep=";", low_memory=False)
     pros["dept"] = pros["code_departement"].apply(norm_dept)
     pros_dept = pros.groupby("dept").agg(
         nb_pros=("specialite_libelle", "count"),
@@ -119,7 +119,7 @@ def load_all_data():
     ).reset_index()
 
     # Établissements
-    etabs = pd.read_csv(base + "local_etab_sante_region_amélioré_v2.csv", sep=";")
+    etabs = pd.read_csv("https://drive.google.com/uc?id=1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC", sep=";")
     etabs["dept"] = etabs["code_departement"].apply(norm_dept)
     etabs_dept = etabs.groupby("dept").agg(
         nb_etabs=("Rslongue", "count"),
@@ -128,7 +128,7 @@ def load_all_data():
     ).reset_index()
 
     # Temps d'accès
-    temps = pd.read_csv(base + "temps_acces_communes.csv", sep=";")
+    temps = pd.read_csv("https://drive.google.com/uc?id=1BoP_S7BYOvDKpwOhpFSEscTM31ltPEEa", sep=";")
     temps["dept"] = temps["code_departement"].apply(norm_dept)
     temps_dept = temps.groupby("dept").agg(
         temps_acces_moyen=("temps_acces", "mean"),
@@ -138,7 +138,7 @@ def load_all_data():
     ).reset_index()
 
     # Immobilier
-    immo = pd.read_csv(base + "immobilier_2025.csv", sep=";", low_memory=False)
+    immo = pd.read_csv("https://drive.google.com/uc?id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
     immo["dept"] = immo["code_departement"].apply(norm_dept)
     immo_dept = immo.groupby("dept").agg(
         prix_m2_moyen=("prix_m2", "mean"),
@@ -147,13 +147,13 @@ def load_all_data():
     ).reset_index()
 
     # Environnement santé (par région)
-    env = pd.read_csv(base + "indice_sante_environnementale.csv", sep=";")
+    env = pd.read_csv("https://drive.google.com/uc?id=1rfdxUJDSX5HzHStZgl5LTUPBoGF9V2i4", sep=";")
     env.columns = ["Code_region", "nom_region", "enviro_score"]
     env["enviro_score"] = env["enviro_score"].astype(str).str.replace(",", ".").replace("nan", np.nan)
     env["enviro_score"] = pd.to_numeric(env["enviro_score"], errors="coerce")
 
     # Médicaments
-    medic = pd.read_csv(base + "disponibilité-des-medicaments.csv", sep=";")
+    medic = pd.read_csv("https://drive.google.com/uc?id=193dosn8DVXFgALvoWynssmxcs-8eNM82", sep=";")
     medic_summary = medic.groupby(["Statut", "Domaine(s) médical(aux)"]).size().reset_index(name="count")
 
     # ─── MASTER JOIN ───────────────────────────────────────────────────────────
