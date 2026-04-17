@@ -390,7 +390,7 @@ with tabs[0]:
             height=560, margin=dict(l=0, r=0, t=10, b=0),
             coloraxis_colorbar=dict(title=map_metric, thickness=12, len=0.7)
         )
-        st.plotly_chart(fig_map, use_container_width=True)
+        st.plotly_chart(fig_map, width="stretch")
     else:
         st.warning("Carte non disponible (impossible de charger le GeoJSON). Veuillez vérifier votre connexion.")
 
@@ -448,7 +448,7 @@ with tabs[1]:
         fig_score.add_vline(x=33, line_dash="dash", line_color="red", opacity=0.5)
         fig_score.add_vline(x=66, line_dash="dash", line_color="orange", opacity=0.5)
         fig_score.update_layout(height=500, showlegend=True, legend_title="Zone")
-        st.plotly_chart(fig_score, use_container_width=True)
+        st.plotly_chart(fig_score,width="stretch")
 
     with r1c2:
         fig_acces = px.bar(
@@ -459,7 +459,7 @@ with tabs[1]:
             title="Temps d'accès moyen aux soins (min)",
             labels={"temps_acces_moyen": "Minutes", "zone_short": "Zone"},
         )
-        st.plotly_chart(fig_acces, use_container_width=True)
+        st.plotly_chart(fig_acces, width="stretch")
 
     r2c1, r2c2 = st.columns(2)
     with r2c1:
@@ -475,7 +475,7 @@ with tabs[1]:
         )
         fig_pros.update_traces(textposition="top center", textfont_size=7)
         fig_pros.update_layout(height=420)
-        st.plotly_chart(fig_pros, use_container_width=True)
+        st.plotly_chart(fig_pros, width="stretch")
 
     with r2c2:
         radar_df = df[df["zone_short"].isin(["Critique", "Favorable"])].groupby("zone_short").agg(
@@ -503,7 +503,7 @@ with tabs[1]:
             title="Profil : Zones Critiques vs Favorables",
             height=420,
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, width="stretch")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -547,7 +547,7 @@ with tabs[2]:
         title=f"Croisement : {axis_labels.get(x_axis)} vs {axis_labels.get(y_axis)}",
     )
     fig_cross.update_layout(height=500)
-    st.plotly_chart(fig_cross, use_container_width=True)
+    st.plotly_chart(fig_cross, width="stretch")
 
     st.markdown('<div class="section-title">🗂️ Tableau de bord consolidé</div>', unsafe_allow_html=True)
 
@@ -569,7 +569,7 @@ with tabs[2]:
 
     st.dataframe(
         display_df.sort_values("Score /100"),
-        use_container_width=True,
+        width="stretch",
         height=420,
     )
 
@@ -613,7 +613,7 @@ with tabs[3]:
             title="Répartition par statut",
             hole=0.4,
         )
-        st.plotly_chart(fig_med_stat, use_container_width=True)
+        st.plotly_chart(fig_med_stat, width="stretch")
 
     with mc2:
         dom_counts = medic.groupby(["Domaine(s) médical(aux)", "Statut"]).size().reset_index(name="count")
@@ -633,7 +633,7 @@ with tabs[3]:
             title="Top 10 domaines médicaux touchés",
             labels={"count": "Nb médicaments", "Domaine(s) médical(aux)": ""},
         )
-        st.plotly_chart(fig_dom, use_container_width=True)
+        st.plotly_chart(fig_dom, width="stretch"
 
     st.markdown('<div class="section-title">📋 Détail des médicaments en tension / rupture</div>', unsafe_allow_html=True)
     filter_statut = st.multiselect(
@@ -645,7 +645,7 @@ with tabs[3]:
         ["Nom", "Statut", "Domaine(s) médical(aux)", "Produit(s) de santé",
          "Date de début d'incident", "Date de fin d'incident"]
     ].sort_values("Statut")
-    st.dataframe(filtered_medic, use_container_width=True, height=350)
+    st.dataframe(filtered_medic, width="stretch", height=350)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -664,7 +664,7 @@ with tabs[4]:
             title="Distribution des prix immobiliers par zone santé",
             labels={"prix_m2_moyen": "Prix moyen (€/m²)", "zone_short": "Zone santé"},
         )
-        st.plotly_chart(fig_immo_zone, use_container_width=True)
+        st.plotly_chart(fig_immo_zone, width="stretch")
 
     with ic2:
         fig_immo_acces = px.scatter(
@@ -676,7 +676,7 @@ with tabs[4]:
             title="Prix immobilier vs Temps d'accès aux soins",
             labels={"prix_m2_moyen": "Prix (€/m²)", "temps_acces_moyen": "Temps accès (min)", "zone_short": "Zone"},
         )
-        st.plotly_chart(fig_immo_acces, use_container_width=True)
+        st.plotly_chart(fig_immo_acces,width="stretch")
 
     # Top 10 prix par type
     st.markdown('<div class="section-title">🏙️ Prix par département — Maisons vs Appartements</div>', unsafe_allow_html=True)
@@ -696,7 +696,7 @@ with tabs[4]:
         color_discrete_sequence=["#2980b9", "#27ae60"],
     )
     fig_immo_type.update_xaxes(tickangle=45)
-    st.plotly_chart(fig_immo_type, use_container_width=True)
+    st.plotly_chart(fig_immo_type, width="stretch")
 
     # Corrélation santé - immo
     st.markdown('<div class="section-title">📈 Corrélation Score Santé ↔ Marché Immobilier</div>', unsafe_allow_html=True)
@@ -713,7 +713,7 @@ with tabs[4]:
         labels=dict(color="Corrélation"),
     )
     fig_corr.update_layout(height=420)
-    st.plotly_chart(fig_corr, use_container_width=True)
+    st.plotly_chart(fig_corr, width="stretch")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -819,7 +819,7 @@ with tabs[5]:
             title=f"Profil de {dept_choice} vs Moyenne nationale",
             height=380,
         )
-        st.plotly_chart(fig_detail_radar, use_container_width=True)
+        st.plotly_chart(fig_detail_radar, width="stretch")
 
     with ra2:
         # Recommandations
@@ -877,7 +877,7 @@ with tabs[5]:
             }
         ))
         fig_gauge.update_layout(height=240, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        st.plotly_chart(fig_gauge, width="stretch")
 
     # Classement comparatif
     st.markdown("---")
@@ -895,7 +895,7 @@ with tabs[5]:
     for col in ["Score /100", "Accès (min)", "Pros/100k", "Enviro/20"]:
         if col in priority_df.columns:
             priority_df[col] = pd.to_numeric(priority_df[col], errors="coerce").round(1)
-    st.dataframe(priority_df.set_index("Rang"), use_container_width=True)
+    st.dataframe(priority_df.set_index("Rang"), width="stretch")
 
 
 # ─── FOOTER ────────────────────────────────────────────────────────────────────
