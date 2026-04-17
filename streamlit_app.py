@@ -358,7 +358,7 @@ with tabs[0]:
         st.markdown("#### 🟢 Zones favorables")
         for _, r in fav_dept.iterrows():
             st.markdown(f"**{r['Nom du département']}** — score {r['score_global']:.0f}/100")
-
+#-------------------------------------------------
     st.markdown('<div class="section-title">📊 Comparaison des Départements</div>', unsafe_allow_html=True)
     top_n   = st.slider("Nombre de départements à afficher", 10, 50, 20)
     sort_by = st.radio("Trier par", ["Score global","Temps d'accès","Pros / 100k","Prix immobilier"], horizontal=True)
@@ -424,77 +424,6 @@ with tabs[0]:
         fig_radar.update_layout(polar=dict(radialaxis=dict(range=[0,100])),
             title="Profil : Zones Critiques vs Favorables", height=420)
         st.plotly_chart(fig_radar, use_container_width=True)
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 2 – ANALYSE COMPARATIVE
-# ══════════════════════════════════════════════════════════════════════════════
-with tabs[1]:
-    st.markdown('<div class="section-title">📊 Comparaison des Départements</div>', unsafe_allow_html=True)
-    top_n   = st.slider("Nombre de départements à afficher", 10, 50, 20)
-    sort_by = st.radio("Trier par", ["Score global","Temps d'accès","Pros / 100k","Prix immobilier"], horizontal=True)
-    sort_map = {
-        "Score global":    ("score_global",     False),
-        "Temps d'accès":   ("temps_acces_moyen",True),
-        "Pros / 100k":     ("pros_pour_100k",   False),
-        "Prix immobilier": ("prix_m2_moyen",    True),
-    }
-    sort_col, asc = sort_map[sort_by]
-    plot_df = df.sort_values(sort_col, ascending=asc).head(top_n)
-    color_zones = {"Critique": "#e74c3c", "Intermédiaire": "#f39c12", "Favorable": "#27ae60"}
-
-    r1c1, r1c2 = st.columns(2)
-    with r1c1:
-        fig_score = px.bar(
-            plot_df.sort_values("score_global"), x="score_global", y="Nom du département",
-            color="zone_short", color_discrete_map=color_zones, orientation="h",
-            title="Score global santé (0–100)",
-            labels={"score_global": "Score", "zone_short": "Zone"},
-        )
-        fig_score.add_vline(x=33, line_dash="dash", line_color="red",    opacity=0.5)
-        fig_score.add_vline(x=66, line_dash="dash", line_color="orange", opacity=0.5)
-        fig_score.update_layout(height=500)
-        st.plotly_chart(fig_score, use_container_width=True)
-    with r1c2:
-        fig_acces = px.bar(
-            plot_df.sort_values("temps_acces_moyen"), x="temps_acces_moyen", y="Nom du département",
-            color="zone_short", color_discrete_map=color_zones, orientation="h",
-            title="Temps d'accès moyen aux soins (min)",
-            labels={"temps_acces_moyen": "Minutes", "zone_short": "Zone"},
-        )
-        st.plotly_chart(fig_acces, use_container_width=True)
-
-    r2c1, r2c2 = st.columns(2)
-    with r2c1:
-        fig_pros = px.scatter(
-            df, x="temps_acces_moyen", y="pros_pour_100k",
-            color="zone_short", color_discrete_map=color_zones,
-            size="population_num", size_max=30,
-            hover_name="Nom du département", text="dept",
-            title="Accès aux soins vs Densité médicale",
-            labels={"temps_acces_moyen":"Temps accès (min)","pros_pour_100k":"Pros / 100k hab.","zone_short":"Zone"},
-        )
-        fig_pros.update_traces(textposition="top center", textfont_size=7)
-        fig_pros.update_layout(height=420)
-        st.plotly_chart(fig_pros, use_container_width=True)
-    with r2c2:
-        radar_df = df[df["zone_short"].isin(["Critique","Favorable"])].groupby("zone_short").agg(
-            score_acces=("score_acces","mean"), score_pros=("score_pros","mean"),
-            score_etabs=("score_etabs","mean"), score_env=("score_env","mean"),
-        ).reset_index()
-        categories = ["Accès aux soins","Professionnels","Établissements","Environnement"]
-        fig_radar = go.Figure()
-        for _, row in radar_df.iterrows():
-            vals = [row["score_acces"],row["score_pros"],row["score_etabs"],row["score_env"]]
-            color = "#e74c3c" if row["zone_short"] == "Critique" else "#27ae60"
-            fig_radar.add_trace(go.Scatterpolar(
-                r=vals+vals[:1], theta=categories+[categories[0]],
-                fill="toself", name=row["zone_short"],
-                line_color=color, fillcolor=color, opacity=0.35
-            ))
-        fig_radar.update_layout(polar=dict(radialaxis=dict(range=[0,100])),
-            title="Profil : Zones Critiques vs Favorables", height=420)
-        st.plotly_chart(fig_radar, use_container_width=True)
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 – CROISEMENT
 # ══════════════════════════════════════════════════════════════════════════════
