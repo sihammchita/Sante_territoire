@@ -146,6 +146,11 @@ def load_all_data():
         nb_communes=("commune", "count"),
         nb_communes_critiques=("temps_acces", lambda x: (x > 15).sum()),
     ).reset_index()
+    temps_commune = temps_raw[[
+    "code_departement",
+    "commune",
+    "temps_acces"
+    ]].copy()
     del temps_raw
 
     # ── Immobilier — SEULEMENT les colonnes nécessaires ──────────────────────
@@ -162,6 +167,12 @@ def load_all_data():
     ).reset_index()
     # Garder immo_raw en mémoire pour l'onglet immobilier (mais allégé)
     immo_type = immo_raw[["dept", "nom_departement", "type_local", "prix_m2"]].copy()
+    immo_commune = immo_raw[[
+    "code_departement",
+    "commune",
+    "prix_m2",
+    "valeur_fonciere"
+    ]].copy()
     del immo_raw
 
     # ── Environnement ────────────────────────────────────────────────────────
@@ -218,10 +229,10 @@ def load_all_data():
         lambda s: "Critique" if s < 33 else ("Intermédiaire" if s < 66 else "Favorable")
     )
 
-    return master, medic, immo_type, env
+    return master, medic, immo_type, env, immo_commune, temps_commune
 
 
-master, medic, immo_type, env = load_all_data()
+master, medic, immo_type, env, immo, temps = load_all_data()
 
 
 # ─── GEOJSON ──────────────────────────────────────────────────────────────────
@@ -598,6 +609,7 @@ with tabs[4]:
     # ─────────────────────────────────────────────────────────────
     st.markdown('<div class="section-title">📍 Prix immobilier vs Temps d\'accès aux soins — par commune</div>', unsafe_allow_html=True)
 
+    
     def clean_str(x):
         return x.astype(str).str.lower().str.strip()
 
