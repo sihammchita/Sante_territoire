@@ -334,16 +334,7 @@ with tabs[0]:
             color_continuous_scale=color_scale if higher_better else color_scale + "_r",
             labels={col_key: map_metric},
         )
-        fig_map.update_geos(
-            scope="europe",   # important
-            projection_type="mercator",
-            center={"lat": 46.5, "lon": 2.5},  # centre de la France
-            projection_scale=5.5,              # zoom (ajuste si besoin)
-            visible=False,
-            showcoastlines=False,
-            showland=True,
-            landcolor="rgb(240,240,240)"
-        )
+        fig_map.update_geos(fitbounds="locations", visible=False)
         fig_map.update_layout(height=560, margin=dict(l=0,r=0,t=10,b=0),
             coloraxis_colorbar=dict(title=map_metric, thickness=12, len=0.7))
         st.plotly_chart(fig_map, use_container_width=True)
