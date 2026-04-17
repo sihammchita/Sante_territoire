@@ -118,7 +118,7 @@ def load_all_data():
     pros_dept = pros.groupby("dept").agg(
         nb_pros=("specialite_libelle", "count"),
         nb_med_gen=("specialite_libelle", lambda x: (x == "Médecin généraliste").sum()),
-        nb_specialistes=("specialite_libelle", lambda x: x.isin(["Cardiologue","Pédiatre","Psychiatre","Gynécologue médical","Ophtalmologue"]).sum()),
+        nb_specialistes=("specialite_libelle", lambda x: x.isin(["Cardiologue","Gynécologue / Obstétricien","Pédiatre","Chirurgien urologue","Chirurgien orthopédiste et traumatologue","Endocrinologue-diabétologue","Chirurgien vasculaire","Oto-Rhino-Laryngologue (ORL) et chirurgien cervico-facial","Anesthésiste réanimateur","Neurologue","Pneumologue","Néphrologue","Médecin spécialiste en santé publique et médecine sociale","Ophtalmologiste","Psychiatre","Radiologue","Dermatologue et vénéréologue","Rhumatologue","Stomatologue","Spécialiste en médecine physique et de réadaptation","Spécialiste en allergologie","Chirurgien général","Médecin biologiste","Gastro-entérologue et hépatologue","Radiothérapeute","Chirurgien viscéral","Chirurgien plasticien","Anatomo-Cyto-Pathologiste","Cancérologue radiothérapeute","Chirurgien maxillo-facial et stomatologiste","Médecine d’urgence","Médecine vasculaire","Chirurgien oral","Médecin spécialiste en médecine nucléaire","Neurochirurgien","Cancérologue médical","Spécialiste en médecine interne","Hématologue","Chirurgien thoracique et cardio-vasculaire","Réanimateur médical","Gériatre","Chirurgien maxillo-facial","Neuropsychiatre","Chirurgien infantile","Médecine des Maladies infectieuses et tropicales","Médecin généticien","Médecine légale et expertises médicales"]).sum()),
         nb_infirmiers=("specialite_libelle", lambda x: (x == "Infirmier").sum()),
         nb_pharmaciens=("specialite_libelle", lambda x: (x == "Pharmacien").sum()),
     ).reset_index()
@@ -179,7 +179,7 @@ def load_all_data():
     master["population_num"] = pd.to_numeric(
         master["population"].astype(str).str.replace(" ","").str.replace(",","."), errors="coerce"
     )
-    master["pros_pour_100k"] = master["nb_pros"] / (master["population_num"] / 100000)
+    master["pros_pour_100k"] = (master["nb_med_gen"]+master["nb_specialistes"] )/ (master["population_num"] / 100000)
     master["med_gen_pour_100k"] = master["nb_med_gen"] / (master["population_num"] / 100000)
     master["hopitaux_pour_100k"] = master["nb_hopitaux"] / (master["population_num"] / 100000)
 
@@ -252,27 +252,7 @@ with st.sidebar:
         default=[]
     )
 
-    st.markdown("---")
-    st.markdown("### 🎚 Pondération du score global")
-    w_acces  = st.slider("Poids Accès aux soins", 0, 100, 30, 5)
-    w_pros   = st.slider("Poids Professionnels", 0, 100, 30, 5)
-    w_etabs  = st.slider("Poids Établissements", 0, 100, 25, 5)
-    w_env    = st.slider("Poids Environnement", 0, 100, 15, 5)
-    total_w  = w_acces + w_pros + w_etabs + w_env
-    if total_w > 0:
-        master["score_global"] = (
-            master["score_acces"] * (w_acces / total_w) +
-            master["score_pros"]  * (w_pros  / total_w) +
-            master["score_etabs"] * (w_etabs / total_w) +
-            master["score_env"]   * (w_env   / total_w)
-        )
-    master["zone"] = master["score_global"].apply(
-        lambda s: "🔴 Zone critique" if s < 33 else ("🟡 Zone intermédiaire" if s < 66 else "🟢 Zone favorable")
-    )
-    master["zone_short"] = master["score_global"].apply(
-        lambda s: "Critique" if s < 33 else ("Intermédiaire" if s < 66 else "Favorable")
-    )
-
+   
     st.markdown("---")
     st.markdown("### 📊 Source des données")
     st.caption("• Population 2021 – INSEE\n• Pros santé – RPPS\n• Établissements – FINESS\n• Immo 2025 – DVF\n• Médicaments – ANSM\n• Enviro – Score régional")
