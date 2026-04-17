@@ -174,7 +174,7 @@ def load_all_data():
     # agrégation département
     immo_dept = immo_raw.groupby("dept").agg(
         prix_m2_moyen=("prix_m2", "mean"),
-        nb_transactions=("valeur_fonciere", "count"),
+        nb_transactions=("valeur_fonciere", "count"), 
         surface_moy=("surface_m2", "mean"),
     ).reset_index()
     
