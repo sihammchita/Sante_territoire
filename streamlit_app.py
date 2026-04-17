@@ -123,7 +123,7 @@ def load_all_data():
 
     # ── Établissements ───────────────────────────────────────────────────────────
     etabs_raw = download_drive_csv(
-        "1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC",
+        "1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC", 
         usecols=["code_departement", "Rslongue", "categetab"]
     )
     etabs_raw["dept"] = etabs_raw["code_departement"].apply(norm_dept)
