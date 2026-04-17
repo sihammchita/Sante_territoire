@@ -252,27 +252,7 @@ with st.sidebar:
         default=[]
     )
 
-    st.markdown("---")
-    st.markdown("### 🎚 Pondération du score global")
-    w_acces  = st.slider("Poids Accès aux soins", 0, 100, 30, 5)
-    w_pros   = st.slider("Poids Professionnels", 0, 100, 30, 5)
-    w_etabs  = st.slider("Poids Établissements", 0, 100, 25, 5)
-    w_env    = st.slider("Poids Environnement", 0, 100, 15, 5)
-    total_w  = w_acces + w_pros + w_etabs + w_env
-    if total_w > 0:
-        master["score_global"] = (
-            master["score_acces"] * (w_acces / total_w) +
-            master["score_pros"]  * (w_pros  / total_w) +
-            master["score_etabs"] * (w_etabs / total_w) +
-            master["score_env"]   * (w_env   / total_w)
-        )
-    master["zone"] = master["score_global"].apply(
-        lambda s: "🔴 Zone critique" if s < 33 else ("🟡 Zone intermédiaire" if s < 66 else "🟢 Zone favorable")
-    )
-    master["zone_short"] = master["score_global"].apply(
-        lambda s: "Critique" if s < 33 else ("Intermédiaire" if s < 66 else "Favorable")
-    )
-
+  
     st.markdown("---")
     st.markdown("### 📊 Source des données")
     st.caption("• Population 2021 – INSEE\n• Pros santé – RPPS\n• Établissements – FINESS\n• Immo 2025 – DVF\n• Médicaments – ANSM\n• Enviro – Score régional")
