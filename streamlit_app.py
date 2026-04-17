@@ -308,7 +308,7 @@ with tabs[0]:
     c1, c2 = st.columns([3, 1])
     with c1:
         map_metric = st.selectbox("Indicateur cartographié", [
-            "Score global santé","Temps d'accès moyen (min)","Professionnels pour 100k hab.",
+            "Score global santé","Généralistes le plus proche (min)","Professionnels pour 100k hab.",
             "Médecins généralistes pour 100k","Prix immobilier moyen (€/m²)","Part des +65 ans (%)",
         ])
     with c2:
@@ -316,7 +316,7 @@ with tabs[0]:
 
     metric_map = {
         "Score global santé":               ("score_global",       True),
-        "Temps d'accès moyen (min)":        ("temps_acces_moyen",  False),
+        "Généralistes le plus proche (min)":        ("temps_acces_moyen",  False),
         "Professionnels pour 100k hab.":    ("pros_pour_100k",     True),
         "Médecins généralistes pour 100k":  ("med_gen_pour_100k",  True),
         "Prix immobilier moyen (€/m²)":     ("prix_m2_moyen",      False),
