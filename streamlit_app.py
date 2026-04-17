@@ -346,7 +346,7 @@ with tabs[0]:
         )
         fig_map.update_layout(height=560, margin=dict(l=0,r=0,t=10,b=0),
             coloraxis_colorbar=dict(title=map_metric, thickness=12, len=0.7))
-            st.plotly_chart(fig_map, use_container_width=True)
+        st.plotly_chart(fig_map, use_container_width=True)
     else:
         st.warning("Carte non disponible — vérifiez votre connexion.")
 
