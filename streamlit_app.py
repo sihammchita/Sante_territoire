@@ -115,7 +115,7 @@ def load_all_data():
     pros_dept = pros_raw.groupby("dept").agg(
         nb_med_gen=("specialite_libelle", lambda x: (x == "Médecin généraliste").sum()),
         nb_specialistes=("specialite_libelle", lambda x: x.isin(SPECIALISTES).sum()),
-        nb_pros=nb_med_gen+nb_specialistes,
+        nb_pros=(("specialite_libelle", lambda x: (x == "Médecin généraliste").sum()))+("specialite_libelle", lambda x: x.isin(SPECIALISTES).sum()),
         nb_infirmiers=("specialite_libelle", lambda x: (x == "Infirmier").sum()),
         nb_pharmaciens=("specialite_libelle", lambda x: (x == "Pharmacien").sum()),
     ).reset_index()
