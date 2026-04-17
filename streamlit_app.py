@@ -296,7 +296,7 @@ st.markdown("")
 
 
 # ─── TABS ─────────────────────────────────────────────────────────────────────
-tabs = st.tabs(["🗺️ Carte Territoriale", "📊 Analyse Comparative", "🔬 Croisement Données",
+tabs = st.tabs(["🗺️ Carte Territoriale", "🔬 Tableau de bord",
                 "💊 Médicaments", "🏠 Immobilier & Santé", "🎯 Aide à la Décision"])
 
 
@@ -428,35 +428,6 @@ with tabs[0]:
 # TAB 3 – CROISEMENT
 # ══════════════════════════════════════════════════════════════════════════════
 with tabs[2]:
-    st.markdown('<div class="section-title">🔬 Croisement Multi-dimensionnel des Données</div>', unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        x_axis = st.selectbox("Axe X", ["temps_acces_moyen","pros_pour_100k","prix_m2_moyen","pct_plus_65","densite","enviro_score","med_gen_pour_100k"])
-    with c2:
-        y_axis = st.selectbox("Axe Y", ["pros_pour_100k","score_global","temps_acces_moyen","pct_plus_65","enviro_score","prix_m2_moyen"])
-    with c3:
-        size_axis = st.selectbox("Taille bulles", ["population_num","nb_etabs","nb_hopitaux","nb_transactions"])
-
-    axis_labels = {
-        "temps_acces_moyen":"Temps d'accès (min)","pros_pour_100k":"Pros santé / 100k",
-        "prix_m2_moyen":"Prix immo (€/m²)","pct_plus_65":"Part +65 ans (%)",
-        "densite":"Densité (hab/km²)","enviro_score":"Score environnement",
-        "score_global":"Score global","med_gen_pour_100k":"Med. gen. / 100k",
-        "population_num":"Population","nb_etabs":"Nb établissements",
-        "nb_hopitaux":"Nb hôpitaux","nb_transactions":"Nb transactions immo",
-    }
-    fig_cross = px.scatter(
-        df.dropna(subset=[x_axis, y_axis, size_axis]),
-        x=x_axis, y=y_axis, size=size_axis, size_max=45,
-        color="zone_short",
-        color_discrete_map={"Critique":"#e74c3c","Intermédiaire":"#f39c12","Favorable":"#27ae60"},
-        hover_name="Nom du département",
-        labels={x_axis:axis_labels.get(x_axis,x_axis), y_axis:axis_labels.get(y_axis,y_axis), "zone_short":"Zone"},
-        title=f"Croisement : {axis_labels.get(x_axis)} vs {axis_labels.get(y_axis)}",
-    )
-    fig_cross.update_layout(height=500)
-    st.plotly_chart(fig_cross, use_container_width=True)
-
     st.markdown('<div class="section-title">🗂️ Tableau de bord consolidé</div>', unsafe_allow_html=True)
     display_cols = ["dept","Nom du département","Nom de la région","zone","score_global",
                     "temps_acces_moyen","pros_pour_100k","med_gen_pour_100k","nb_hopitaux",
