@@ -296,14 +296,110 @@ st.markdown("")
 
 
 # ─── TABS ─────────────────────────────────────────────────────────────────────
-tabs = st.tabs(["🗺️ Carte Territoriale", "🔬 Tableau de bord",
-                "💊 Médicaments", "🏠 Immobilier & Santé", "🎯 Aide à la Décision"])
+tabs = st.tabs(["🎯 Aide à la Décision","🗺️ Carte Territoriale", "🔬 Tableau de bord",
+                "💊 Médicaments", "🏠 Immobilier & Santé"])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 6 – AIDE À LA DÉCISION
+# ══════════════════════════════════════════════════════════════════════════════
+with tabs[0]:
+    st.markdown('<div class="section-title">🎯 Aide à la Décision — Priorisation Territoriale</div>', unsafe_allow_html=True)
+    st.markdown("Ce module synthétise l'ensemble des indicateurs pour vous aider à **identifier les priorités d'intervention**, **évaluer l'attractivité d'un territoire** et **orienter vos décisions** en matière de politique de santé.")
+
+    dept_choice = st.selectbox("Département", options=df.sort_values("score_global")["Nom du département"].dropna().tolist())
+    row = df[df["Nom du département"] == dept_choice].iloc[0]
+    score = row["score_global"]
+
+    if score < 33:   badge_class, verdict, alert_class = "badge-red",    "🔴 Zone Critique — Intervention prioritaire recommandée",    "alert-critical"
+    elif score < 66: badge_class, verdict, alert_class = "badge-orange", "🟡 Zone Intermédiaire — Surveillance et amélioration ciblée","alert-warning"
+    else:            badge_class, verdict, alert_class = "badge-green",  "🟢 Zone Favorable — Maintien des acquis recommandé",          "alert-ok"
+
+    st.markdown(f"""
+    <div class="alert-box {alert_class}">
+      <strong>{dept_choice} ({row['dept']}) — {row.get('Nom de la région','')}</strong><br>
+      {verdict}<br>
+      Score global : <span class="score-badge {badge_class}">{score:.1f}/100</span>
+    </div>""", unsafe_allow_html=True)
+
+    d1, d2, d3, d4 = st.columns(4)
+    ta = float(row.get("temps_acces_moyen", np.nan) or 0)
+    pp = float(row.get("pros_pour_100k",    np.nan) or 0)
+    pm = float(row.get("prix_m2_moyen",     np.nan) or 0)
+    es = float(str(row.get("enviro_score",  10) or 10).replace(",","."))
+
+    with d1: st.markdown(f'<div class="kpi-card {"danger" if ta>12 else "warning" if ta>7 else "success"}"><div class="kpi-value">{ta:.1f} min</div><div class="kpi-label">Temps d\'accès moyen</div></div>', unsafe_allow_html=True)
+    with d2: st.markdown(f'<div class="kpi-card {"danger" if pp<200 else "warning" if pp<400 else "success"}"><div class="kpi-value">{pp:.0f}</div><div class="kpi-label">Pros / 100k hab.</div></div>', unsafe_allow_html=True)
+    with d3: st.markdown(f'<div class="kpi-card"><div class="kpi-value">{pm:.0f} €</div><div class="kpi-label">Prix immo moyen /m²</div></div>', unsafe_allow_html=True)
+    with d4: st.markdown(f'<div class="kpi-card {"danger" if es<7 else "warning" if es<12 else "success"}"><div class="kpi-value">{es:.1f}/20</div><div class="kpi-label">Score environnemental</div></div>', unsafe_allow_html=True)
+
+    ra1, ra2 = st.columns(2)
+    with ra1:
+        categories = ["Accès aux soins","Professionnels","Établissements","Environnement"]
+        vals_dept = [float(row.get(k,0) or 0) for k in ["score_acces","score_pros","score_etabs","score_env"]]
+        vals_nat  = [float(master[k].mean()) for k in ["score_acces","score_pros","score_etabs","score_env"]]
+        fig_detail_radar = go.Figure()
+        fig_detail_radar.add_trace(go.Scatterpolar(r=vals_dept+vals_dept[:1], theta=categories+[categories[0]],
+            fill="toself", name=dept_choice, line_color="#2980b9", fillcolor="rgba(41,128,185,0.25)"))
+        fig_detail_radar.add_trace(go.Scatterpolar(r=vals_nat+vals_nat[:1], theta=categories+[categories[0]],
+            fill="toself", name="Moyenne nationale", line_color="#7f8c8d", fillcolor="rgba(127,140,141,0.15)", line_dash="dash"))
+        fig_detail_radar.update_layout(polar=dict(radialaxis=dict(range=[0,100])),
+            title=f"Profil de {dept_choice} vs Moyenne nationale", height=380)
+        st.plotly_chart(fig_detail_radar, use_container_width=True)
+
+    with ra2:
+        st.markdown("#### 💡 Recommandations stratégiques")
+        reco_list = []
+        if ta > 12:  reco_list.append(("🔴","Accès aux soins critique","Renforcer les maisons de santé pluridisciplinaires et les dispositifs de télémédecine."))
+        elif ta > 7: reco_list.append(("🟡","Accès aux soins à surveiller","Envisager des consultations avancées et des transports sanitaires renforcés."))
+        else:        reco_list.append(("🟢","Bon accès aux soins","Maintenir les structures existantes."))
+
+        if pp < 200:  reco_list.append(("🔴","Désert médical","Incitations fiscales et bourses pour l'installation de médecins généralistes."))
+        elif pp < 400:reco_list.append(("🟡","Densité médicale insuffisante","Renforcer les partenariats avec les facultés de médecine locales."))
+        else:         reco_list.append(("🟢","Bonne densité médicale","Encourager la spécialisation et la formation continue."))
+
+        if es < 7:    reco_list.append(("🔴","Risque environnemental élevé","Audit sanitaire environnemental recommandé (air, eau, sols)."))
+        elif es < 12: reco_list.append(("🟡","Environnement à surveiller","Suivi des indicateurs de pollution et prévention ciblée."))
+        else:         reco_list.append(("🟢","Bon environnement santé","Valoriser cet atout dans la communication territoriale."))
+
+        for icon, title, text in reco_list:
+            cls = "alert-critical" if icon=="🔴" else ("alert-warning" if icon=="🟡" else "alert-ok")
+            st.markdown(f'<div class="alert-box {cls}"><strong>{icon} {title}</strong><br>{text}</div>', unsafe_allow_html=True)
+
+        st.markdown("#### 🏗️ Opportunité d'investissement")
+        opp_score = min((100-score)*0.4 + min(pm/100,100)*0.3 + float(row.get("pct_plus_65",15) or 15)*2, 100)
+        opp_label = "Forte" if opp_score>60 else ("Modérée" if opp_score>35 else "Faible")
+        opp_color = "#e74c3c" if opp_score>60 else ("#f39c12" if opp_score>35 else "#27ae60")
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number", value=opp_score,
+            title={"text": f"Besoin d'investissement santé : {opp_label}"},
+            gauge={"axis":{"range":[0,100]},"bar":{"color":opp_color},
+                   "steps":[{"range":[0,35],"color":"#eafaf1"},{"range":[35,60],"color":"#fef9e7"},{"range":[60,100],"color":"#fdecea"}],
+                   "threshold":{"line":{"color":"black","width":2},"thickness":0.75,"value":opp_score}}
+        ))
+        fig_gauge.update_layout(height=240, margin=dict(l=20,r=20,t=40,b=20))
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("#### 🏆 Classement — Top 10 priorités d'intervention")
+    priority_df = df.sort_values("score_global").head(10)[
+        ["dept","Nom du département","Nom de la région","zone","score_global","temps_acces_moyen","pros_pour_100k","enviro_score"]
+    ].copy()
+    priority_df["Rang"] = range(1, len(priority_df)+1)
+    priority_df = priority_df.rename(columns={
+        "dept":"Code","Nom du département":"Département","Nom de la région":"Région","zone":"Zone",
+        "score_global":"Score /100","temps_acces_moyen":"Accès (min)","pros_pour_100k":"Pros/100k","enviro_score":"Enviro/20"
+    })
+    for col in ["Score /100","Accès (min)","Pros/100k","Enviro/20"]:
+        if col in priority_df.columns:
+            priority_df[col] = pd.to_numeric(priority_df[col], errors="coerce").round(1)
+    st.dataframe(priority_df.set_index("Rang"), use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 1 – CARTE
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[0]:
+with tabs[1]:
     st.markdown('<div class="section-title">🗺️ Carte des Départements — Score Santé Global</div>', unsafe_allow_html=True)
     c1, c2 = st.columns([3, 1])
     with c1:
@@ -427,7 +523,7 @@ with tabs[0]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 – CROISEMENT
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[1]:
+with tabs[2]:
     st.markdown('<div class="section-title">🗂️ Tableau de bord consolidé</div>', unsafe_allow_html=True)
     display_cols = ["dept","Nom du département","Nom de la région","zone","score_global",
                     "temps_acces_moyen","pros_pour_100k","med_gen_pour_100k","nb_hopitaux",
@@ -450,7 +546,7 @@ with tabs[1]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4 – MÉDICAMENTS
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[2]:
+with tabs[3]:
     st.markdown('<div class="section-title">💊 Disponibilité des Médicaments</div>', unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
     nb_ruptures = int((medic["Statut"] == "Rupture de stock").sum())
