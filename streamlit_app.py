@@ -288,7 +288,7 @@ with k2:
 with k3:
     st.markdown(f'<div class="kpi-card success"><div class="kpi-value">{n_fav}</div><div class="kpi-label">Zones favorables</div></div>', unsafe_allow_html=True)
 with k4:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-value">{avg_acces:.1f} min</div><div class="kpi-label">Généralistes le + proche(min)</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-value">{avg_acces:.1f} min</div><div class="kpi-label">Accès généralistes</div></div>', unsafe_allow_html=True)
 with k5:
     st.markdown(f'<div class="kpi-card"><div class="kpi-value">{avg_pros:.0f}</div><div class="kpi-label">Pros santé / 100k hab.</div></div>', unsafe_allow_html=True)
 
@@ -308,7 +308,7 @@ with tabs[0]:
     c1, c2 = st.columns([3, 1])
     with c1:
         map_metric = st.selectbox("Indicateur cartographié", [
-            "Score global santé","Accès généralistes","Professionnels pour 100k hab.",
+            "Score global santé","Généralistes le plus proche (min)","Professionnels pour 100k hab.",
             "Médecins généralistes pour 100k","Prix immobilier moyen (€/m²)","Part des +65 ans (%)",
         ])
     with c2:
