@@ -129,7 +129,7 @@ def load_all_data():
     etabs_raw["dept"] = etabs_raw["code_departement"].apply(norm_dept)
     etabs_dept = etabs_raw.groupby("dept").agg(
         nb_etabs=("Rslongue", "count"),
-        nb_hopitaux=("categetab", lambda x: x.isin(["Centre Hospitalier (C.H.)","Centre Hospitalier Régional (C.H.R.)","Centre hospitalier, ex Hôpital local"]).sum()),
+        nb_hopitaux=("categetab", lambda x: x.isin(["Centre Hospitalier (C.H.)","Centre Hospitalier Régional (C.H.R.)","Centre Hospitalier Spécialisé lutte Maladies Mentales","Centre hospitalier, ex Hôpital local","Centre de Lutte Contre Cancer","Etablissement de Soins Chirurgicaux","Etablissement Soins Obstétriques Chirurgico-Gynécologiques"]).sum()),
         nb_cliniques=("categetab", lambda x: x.str.contains("Clinique|privé", na=False, case=False).sum()),
     ).reset_index()
     del etabs_raw
