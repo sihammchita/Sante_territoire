@@ -593,90 +593,151 @@ with tabs[3]:
 with tabs[4]:
     st.markdown('<div class="section-title">🏠 Immobilier & Attractivité Territoriale</div>', unsafe_allow_html=True)
 
-    # ── Prix immo par commune vs Temps d'accès par commune ──────────────────
+    # ─────────────────────────────────────────────────────────────
+    # 📍 SCATTER COMMUNE
+    # ─────────────────────────────────────────────────────────────
     st.markdown('<div class="section-title">📍 Prix immobilier vs Temps d\'accès aux soins — par commune</div>', unsafe_allow_html=True)
 
-    # Jointure immo (commune) + temps accès (commune)
+    def clean_str(x):
+        return x.astype(str).str.lower().str.strip()
+
     immo_commune = immo.copy()
     immo_commune["dept"] = immo_commune["code_departement"].astype(str).str.zfill(2)
+    immo_commune["commune"] = clean_str(immo_commune["commune"])
 
     temps_commune = temps.copy()
     temps_commune["dept"] = temps_commune["code_departement"].astype(str).str.zfill(2)
+    temps_commune["commune"] = clean_str(temps_commune["commune"])
 
-    # Aggrégation par commune côté immo
+    # Agrégation robuste
     immo_com_agg = immo_commune.groupby(["dept", "commune"]).agg(
-        prix_m2_commune=("prix_m2", "mean"),
+        prix_m2_commune=("prix_m2", "median"),
         nb_transactions=("valeur_fonciere", "count")
     ).reset_index()
 
-    # Jointure avec temps d'accès par commune
+    # Merge
     commune_merge = immo_com_agg.merge(
-        temps_commune[["dept", "commune", "temps_acces"]],
-        on=["dept", "commune"], how="inner"
+        temps_commune,
+        on=["dept", "commune"],
+        how="inner"
     )
-    commune_merge = commune_merge.merge(df[["dept", "zone_short"]], on="dept", how="left")
+
+    commune_merge = commune_merge.merge(
+        df[["dept", "zone_short"]],
+        on="dept",
+        how="left"
+    )
+
     commune_merge = commune_merge.dropna(subset=["prix_m2_commune", "temps_acces"])
 
-    # Filtre pour lisibilité (exclure outliers extrêmes)
-    q99_prix = commune_merge["prix_m2_commune"].quantile(0.99)
-    q99_acces = commune_merge["temps_acces"].quantile(0.99)
+    # Filtre outliers (bilatéral)
+    q1_prix, q99_prix = commune_merge["prix_m2_commune"].quantile([0.01, 0.99])
+    q1_acces, q99_acces = commune_merge["temps_acces"].quantile([0.01, 0.99])
+
     commune_plot = commune_merge[
-        (commune_merge["prix_m2_commune"] <= q99_prix) &
-        (commune_merge["temps_acces"] <= q99_acces)
+        commune_merge["prix_m2_commune"].between(q1_prix, q99_prix) &
+        commune_merge["temps_acces"].between(q1_acces, q99_acces)
     ]
 
     fig_commune_scatter = px.scatter(
         commune_plot,
-        x="temps_acces", y="prix_m2_commune",
+        x="temps_acces",
+        y="prix_m2_commune",
         color="zone_short",
-        color_discrete_map={"Critique": "#e74c3c", "Intermédiaire": "#f39c12", "Favorable": "#27ae60"},
-        size="nb_transactions", size_max=15,
-        hover_name="commune",
-        hover_data={"dept": True, "temps_acces": ":.1f", "prix_m2_commune": ":.0f", "nb_transactions": True},
-        trendline="ols",
+        size="nb_transactions",
+        size_max=15,
         opacity=0.5,
-        title="Prix immobilier (€/m²) vs Temps d'accès aux soins — par commune",
+        trendline="ols",
+        hover_name="commune",
+        color_discrete_map={
+            "Critique": "#e74c3c",
+            "Intermédiaire": "#f39c12",
+            "Favorable": "#27ae60"
+        },
+        title="Prix immobilier vs accès aux soins (commune)",
         labels={
-            "temps_acces": "Temps d'accès aux soins (min)",
-            "prix_m2_commune": "Prix moyen (€/m²)",
-            "zone_short": "Zone santé",
-            "nb_transactions": "Nb transactions"
+            "temps_acces": "Temps d'accès (min)",
+            "prix_m2_commune": "Prix €/m²"
         }
     )
+
     fig_commune_scatter.update_layout(height=520)
     st.plotly_chart(fig_commune_scatter, use_container_width=True)
 
-    st.caption("📌 Chaque point = une commune · Taille = nombre de transactions immobilières · Filtre : 99e percentile appliqué pour exclure les valeurs extrêmes")
+    # Insight auto
+    corr = commune_plot[["temps_acces", "prix_m2_commune"]].corr().iloc[0, 1]
+    st.markdown(f"""
+    **Insight :**
+    - Corrélation prix / accès soins = **{corr:.2f}**
+    - {"Zones bien desservies plus chères" if corr < 0 else "Relation faible ou inverse"}
+    """)
 
-    # ── Maisons vs Appartements ──────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────
+    # 🏙️ MAISONS VS APPARTEMENTS
+    # ─────────────────────────────────────────────────────────────
     st.markdown('<div class="section-title">🏙️ Prix par département — Maisons vs Appartements</div>', unsafe_allow_html=True)
-    immo_type = pd.read_csv("data/immobilier_2025.csv", sep=";", low_memory=False)
-    immo_type["dept"] = immo_type["code_departement"].astype(str).str.zfill(2)
-    immo_type_dept = immo_type.groupby(["dept", "nom_departement", "type_local"])["prix_m2"].mean().reset_index()
-    immo_type_dept = immo_type_dept.merge(df[["dept", "zone_short"]], on="dept", how="left")
-    top_immo = immo_type_dept.groupby("dept")["prix_m2"].mean().nlargest(20).index
+
+    immo_type_dept = immo_type.groupby(
+        ["dept", "nom_departement", "type_local"]
+    )["prix_m2"].median().reset_index()
+
+    immo_type_dept = immo_type_dept.merge(
+        df[["dept", "zone_short"]],
+        on="dept",
+        how="left"
+    )
+
+    top_immo = (
+        immo_type_dept
+        .groupby("dept")["prix_m2"]
+        .mean()
+        .nlargest(20)
+        .index
+    )
 
     fig_immo_type = px.bar(
         immo_type_dept[immo_type_dept["dept"].isin(top_immo)],
-        x="nom_departement", y="prix_m2", color="type_local", barmode="group",
-        title="Top 20 départements — Prix m² par type de bien",
-        labels={"prix_m2": "Prix moyen (€/m²)", "nom_departement": "Département", "type_local": "Type"},
-        color_discrete_sequence=["#2980b9", "#27ae60"]
+        x="nom_departement",
+        y="prix_m2",
+        color="type_local",
+        barmode="group",
+        title="Top 20 départements — prix €/m²",
+        labels={
+            "prix_m2": "Prix €/m²",
+            "nom_departement": "Département"
+        }
     )
+
     fig_immo_type.update_xaxes(tickangle=45)
     st.plotly_chart(fig_immo_type, use_container_width=True)
 
-    # ── Matrice de corrélations ──────────────────────────────────────────────
-    st.markdown('<div class="section-title">📈 Corrélation Score Santé ↔ Marché Immobilier</div>', unsafe_allow_html=True)
-    corr_cols = ["score_global", "prix_m2_moyen", "temps_acces_moyen", "pros_pour_100k",
-                 "nb_hopitaux", "pct_plus_65", "enviro_score"]
+    # ─────────────────────────────────────────────────────────────
+    # 📈 CORRÉLATIONS
+    # ─────────────────────────────────────────────────────────────
+    st.markdown('<div class="section-title">📈 Corrélation Santé ↔ Immobilier</div>', unsafe_allow_html=True)
+
+    corr_cols = [
+        "score_global",
+        "prix_m2_moyen",
+        "temps_acces_moyen",
+        "pros_pour_100k",
+        "nb_hopitaux",
+        "pct_plus_65",
+        "enviro_score"
+    ]
+
     fig_corr = px.imshow(
-        df[corr_cols].dropna().corr(), text_auto=".2f",
-        color_continuous_scale="RdBu", zmin=-1, zmax=1,
-        title="Matrice de corrélations", labels=dict(color="Corrélation")
+        df[corr_cols].dropna().corr(),
+        text_auto=".2f",
+        color_continuous_scale="RdBu",
+        zmin=-1,
+        zmax=1
     )
+
     fig_corr.update_layout(height=420)
     st.plotly_chart(fig_corr, use_container_width=True)
+
+    st.caption("⚠️ Corrélation ≠ causalité")
 
 
 
