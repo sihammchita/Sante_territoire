@@ -232,8 +232,7 @@ def load_all_data():
     return master, medic, immo_type, env, immo_commune, temps_commune
 
 
-master, medic, immo_type, env, immo, temps = load_all_data()
-
+master, medic, immo_type, env, immo_commune, temps_commune = load_all_data()
 
 # ─── GEOJSON ──────────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Chargement de la carte…")
@@ -613,11 +612,9 @@ with tabs[4]:
     def clean_str(x):
         return x.astype(str).str.lower().str.strip()
 
-    immo_commune = immo.copy()
     immo_commune["dept"] = immo_commune["code_departement"].astype(str).str.zfill(2)
     immo_commune["commune"] = clean_str(immo_commune["commune"])
 
-    temps_commune = temps.copy()
     temps_commune["dept"] = temps_commune["code_departement"].astype(str).str.zfill(2)
     temps_commune["commune"] = clean_str(temps_commune["commune"])
 
