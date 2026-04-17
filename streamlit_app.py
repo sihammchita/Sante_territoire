@@ -316,7 +316,7 @@ with tabs[0]:
 
     metric_map = {
         "Score global santé":               ("score_global",       True),
-        "Généralistes le plus proche (min)":        ("temps_acces_moyen",  False),
+        "Généraliste le plus proche (min)":        ("temps_acces_moyen",  False),
         "Professionnels pour 100k hab.":    ("pros_pour_100k",     True),
         "Médecins généralistes pour 100k":  ("med_gen_pour_100k",  True),
         "Prix immobilier moyen (€/m²)":     ("prix_m2_moyen",      False),
