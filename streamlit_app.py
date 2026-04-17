@@ -427,7 +427,7 @@ with tabs[0]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 – CROISEMENT
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[2]:
+with tabs[1]:
     st.markdown('<div class="section-title">🗂️ Tableau de bord consolidé</div>', unsafe_allow_html=True)
     display_cols = ["dept","Nom du département","Nom de la région","zone","score_global",
                     "temps_acces_moyen","pros_pour_100k","med_gen_pour_100k","nb_hopitaux",
@@ -450,7 +450,7 @@ with tabs[2]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4 – MÉDICAMENTS
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[3]:
+with tabs[2]:
     st.markdown('<div class="section-title">💊 Disponibilité des Médicaments</div>', unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
     nb_ruptures = int((medic["Statut"] == "Rupture de stock").sum())
@@ -494,7 +494,7 @@ with tabs[3]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 5 – IMMOBILIER
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[4]:
+with tabs[3]:
     st.markdown('<div class="section-title">🏠 Immobilier & Attractivité Territoriale</div>', unsafe_allow_html=True)
     ic1, ic2 = st.columns(2)
     with ic1:
@@ -541,7 +541,7 @@ with tabs[4]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 6 – AIDE À LA DÉCISION
 # ══════════════════════════════════════════════════════════════════════════════
-with tabs[5]:
+with tabs[4]:
     st.markdown('<div class="section-title">🎯 Aide à la Décision — Priorisation Territoriale</div>', unsafe_allow_html=True)
     st.markdown("Ce module synthétise l'ensemble des indicateurs pour vous aider à **identifier les priorités d'intervention**, **évaluer l'attractivité d'un territoire** et **orienter vos décisions** en matière de politique de santé.")
 
