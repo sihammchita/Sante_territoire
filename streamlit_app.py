@@ -359,7 +359,7 @@ with tabs[0]:
         for _, r in fav_dept.iterrows():
             st.markdown(f"**{r['Nom du département']}** — score {r['score_global']:.0f}/100")
 
-      st.markdown('<div class="section-title">📊 Comparaison des Départements</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📊 Comparaison des Départements</div>', unsafe_allow_html=True)
     top_n   = st.slider("Nombre de départements à afficher", 10, 50, 20)
     sort_by = st.radio("Trier par", ["Score global","Temps d'accès","Pros / 100k","Prix immobilier"], horizontal=True)
     sort_map = {
