@@ -110,21 +110,18 @@ def load_all_data():
     pop = pop.rename(columns=col_map)
 
     # Professionnels santé
-    pros = pd.read_csv(
-    "https://drive.google.com/uc?export=download&id=1_wkO1vtWE2WO9aZmiI8lNPdbecO5V3pA",
-    sep=";",
-    low_memory=False)
+    pros = pd.read_csv(base + "professionnels_sante_clean.csv", sep=";", low_memory=False)
     pros["dept"] = pros["code_departement"].apply(norm_dept)
     pros_dept = pros.groupby("dept").agg(
         nb_pros=("specialite_libelle", "count"),
         nb_med_gen=("specialite_libelle", lambda x: (x == "Médecin généraliste").sum()),
-        nb_specialistes=("specialite_libelle", lambda x: x.isin(["Cardiologue","Pédiatre","Psychiatre","Gynécologue médical","Ophtalmologue"]).sum()),
+        nb_specialistes=("specialite_libelle", lambda x: x.isin(["Cardiologue","Gynécologue / Obstétricien","Pédiatre","Chirurgien urologue","Chirurgien orthopédiste et traumatologue","Endocrinologue-diabétologue","Chirurgien vasculaire","Oto-Rhino-Laryngologue (ORL) et chirurgien cervico-facial","Anesthésiste réanimateur","Neurologue","Pneumologue","Néphrologue","Médecin spécialiste en santé publique et médecine sociale","Ophtalmologiste","Psychiatre","Radiologue","Dermatologue et vénéréologue","Rhumatologue","Stomatologue","Spécialiste en médecine physique et de réadaptation","Spécialiste en allergologie","Chirurgien général","Médecin biologiste","Gastro-entérologue et hépatologue","Radiothérapeute","Chirurgien viscéral","Chirurgien plasticien","Anatomo-Cyto-Pathologiste","Cancérologue radiothérapeute","Chirurgien maxillo-facial et stomatologiste","Médecine d’urgence","Médecine vasculaire","Chirurgien oral","Médecin spécialiste en médecine nucléaire","Neurochirurgien","Cancérologue médical","Spécialiste en médecine interne","Hématologue","Chirurgien thoracique et cardio-vasculaire","Réanimateur médical","Gériatre","Chirurgien maxillo-facial","Neuropsychiatre","Chirurgien infantile","Médecine des Maladies infectieuses et tropicales","Médecin généticien","Médecine légale et expertises médicales"]).sum()),
         nb_infirmiers=("specialite_libelle", lambda x: (x == "Infirmier").sum()),
         nb_pharmaciens=("specialite_libelle", lambda x: (x == "Pharmacien").sum()),
     ).reset_index()
-
+    
     # Établissements
-    etabs = pd.read_csv("https://drive.google.com/uc?export=download&id=1hZ71udkcpyquNPgGowvSxUrjrmK-n-PC", sep=";")
+    etabs = pd.read_csv(base + "local_etab_sante_region_amélioré_v2.csv", sep=";")
     etabs["dept"] = etabs["code_departement"].apply(norm_dept)
     etabs_dept = etabs.groupby("dept").agg(
         nb_etabs=("Rslongue", "count"),
@@ -133,7 +130,7 @@ def load_all_data():
     ).reset_index()
 
     # Temps d'accès
-    temps = pd.read_csv("https://drive.google.com/uc?export=download&id=1BoP_S7BYOvDKpwOhpFSEscTM31ltPEEa", sep=";")
+    temps = pd.read_csv(base + "temps_acces_communes.csv", sep=";")
     temps["dept"] = temps["code_departement"].apply(norm_dept)
     temps_dept = temps.groupby("dept").agg(
         temps_acces_moyen=("temps_acces", "mean"),
@@ -143,7 +140,7 @@ def load_all_data():
     ).reset_index()
 
     # Immobilier
-    immo = pd.read_csv("https://drive.google.com/uc?export=download&id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
+    immo = pd.read_csv(base + "immobilier_2025.csv", sep=";", low_memory=False)
     immo["dept"] = immo["code_departement"].apply(norm_dept)
     immo_dept = immo.groupby("dept").agg(
         prix_m2_moyen=("prix_m2", "mean"),
@@ -152,13 +149,13 @@ def load_all_data():
     ).reset_index()
 
     # Environnement santé (par région)
-    env = pd.read_csv("https://drive.google.com/uc?export=download&id=1rfdxUJDSX5HzHStZgl5LTUPBoGF9V2i4", sep=";")
+    env = pd.read_csv(base + "indice_sante_environnementale.csv", sep=";")
     env.columns = ["Code_region", "nom_region", "enviro_score"]
     env["enviro_score"] = env["enviro_score"].astype(str).str.replace(",", ".").replace("nan", np.nan)
     env["enviro_score"] = pd.to_numeric(env["enviro_score"], errors="coerce")
 
     # Médicaments
-    medic = pd.read_csv("https://drive.google.com/uc?export=download&id=193dosn8DVXFgALvoWynssmxcs-8eNM82", sep=";")
+    medic = pd.read_csv(base + "disponibilité-des-medicaments.csv", sep=";")
     medic_summary = medic.groupby(["Statut", "Domaine(s) médical(aux)"]).size().reset_index(name="count")
 
     # ─── MASTER JOIN ───────────────────────────────────────────────────────────
@@ -179,7 +176,7 @@ def load_all_data():
     master["population_num"] = pd.to_numeric(
         master["population"].astype(str).str.replace(" ","").str.replace(",","."), errors="coerce"
     )
-    master["pros_pour_100k"] = master["nb_pros"] / (master["population_num"] / 100000)
+    master["pros_pour_100k"] = (master["nb_med_gen"]+master["nb_specialistes"] )/ (master["population_num"] / 100000)
     master["med_gen_pour_100k"] = master["nb_med_gen"] / (master["population_num"] / 100000)
     master["hopitaux_pour_100k"] = master["nb_hopitaux"] / (master["population_num"] / 100000)
 
@@ -252,7 +249,6 @@ with st.sidebar:
         default=[]
     )
 
-  
     st.markdown("---")
     st.markdown("### 📊 Source des données")
     st.caption("• Population 2021 – INSEE\n• Pros santé – RPPS\n• Établissements – FINESS\n• Immo 2025 – DVF\n• Médicaments – ANSM\n• Enviro – Score régional")
@@ -370,7 +366,7 @@ with tabs[0]:
             height=560, margin=dict(l=0, r=0, t=10, b=0),
             coloraxis_colorbar=dict(title=map_metric, thickness=12, len=0.7)
         )
-        st.plotly_chart(fig_map, width="stretch")
+        st.plotly_chart(fig_map, use_container_width=True)
     else:
         st.warning("Carte non disponible (impossible de charger le GeoJSON). Veuillez vérifier votre connexion.")
 
@@ -428,7 +424,7 @@ with tabs[1]:
         fig_score.add_vline(x=33, line_dash="dash", line_color="red", opacity=0.5)
         fig_score.add_vline(x=66, line_dash="dash", line_color="orange", opacity=0.5)
         fig_score.update_layout(height=500, showlegend=True, legend_title="Zone")
-        st.plotly_chart(fig_score,width="stretch")
+        st.plotly_chart(fig_score, use_container_width=True)
 
     with r1c2:
         fig_acces = px.bar(
@@ -439,7 +435,7 @@ with tabs[1]:
             title="Temps d'accès moyen aux soins (min)",
             labels={"temps_acces_moyen": "Minutes", "zone_short": "Zone"},
         )
-        st.plotly_chart(fig_acces, width="stretch")
+        st.plotly_chart(fig_acces, use_container_width=True)
 
     r2c1, r2c2 = st.columns(2)
     with r2c1:
@@ -455,7 +451,7 @@ with tabs[1]:
         )
         fig_pros.update_traces(textposition="top center", textfont_size=7)
         fig_pros.update_layout(height=420)
-        st.plotly_chart(fig_pros, width="stretch")
+        st.plotly_chart(fig_pros, use_container_width=True)
 
     with r2c2:
         radar_df = df[df["zone_short"].isin(["Critique", "Favorable"])].groupby("zone_short").agg(
@@ -483,7 +479,7 @@ with tabs[1]:
             title="Profil : Zones Critiques vs Favorables",
             height=420,
         )
-        st.plotly_chart(fig_radar, width="stretch")
+        st.plotly_chart(fig_radar, use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -523,11 +519,12 @@ with tabs[2]:
         color_discrete_map={"Critique": "#e74c3c", "Intermédiaire": "#f39c12", "Favorable": "#27ae60"},
         hover_name="Nom du département",
         hover_data={"dept": True, "zone_short": True, x_axis: ":.1f", y_axis: ":.1f"},
+        trendline="ols",
         labels={x_axis: axis_labels.get(x_axis, x_axis), y_axis: axis_labels.get(y_axis, y_axis), "zone_short": "Zone"},
         title=f"Croisement : {axis_labels.get(x_axis)} vs {axis_labels.get(y_axis)}",
     )
     fig_cross.update_layout(height=500)
-    st.plotly_chart(fig_cross, width="stretch")
+    st.plotly_chart(fig_cross, use_container_width=True)
 
     st.markdown('<div class="section-title">🗂️ Tableau de bord consolidé</div>', unsafe_allow_html=True)
 
@@ -549,7 +546,7 @@ with tabs[2]:
 
     st.dataframe(
         display_df.sort_values("Score /100"),
-        width="stretch",
+        use_container_width=True,
         height=420,
     )
 
@@ -593,7 +590,7 @@ with tabs[3]:
             title="Répartition par statut",
             hole=0.4,
         )
-        st.plotly_chart(fig_med_stat, width="stretch")
+        st.plotly_chart(fig_med_stat, use_container_width=True)
 
     with mc2:
         dom_counts = medic.groupby(["Domaine(s) médical(aux)", "Statut"]).size().reset_index(name="count")
@@ -613,7 +610,7 @@ with tabs[3]:
             title="Top 10 domaines médicaux touchés",
             labels={"count": "Nb médicaments", "Domaine(s) médical(aux)": ""},
         )
-        st.plotly_chart(fig_dom, width="stretch")
+        st.plotly_chart(fig_dom, use_container_width=True)
 
     st.markdown('<div class="section-title">📋 Détail des médicaments en tension / rupture</div>', unsafe_allow_html=True)
     filter_statut = st.multiselect(
@@ -625,7 +622,7 @@ with tabs[3]:
         ["Nom", "Statut", "Domaine(s) médical(aux)", "Produit(s) de santé",
          "Date de début d'incident", "Date de fin d'incident"]
     ].sort_values("Statut")
-    st.dataframe(filtered_medic, width="stretch", height=350)
+    st.dataframe(filtered_medic, use_container_width=True, height=350)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -644,7 +641,7 @@ with tabs[4]:
             title="Distribution des prix immobiliers par zone santé",
             labels={"prix_m2_moyen": "Prix moyen (€/m²)", "zone_short": "Zone santé"},
         )
-        st.plotly_chart(fig_immo_zone, width="stretch")
+        st.plotly_chart(fig_immo_zone, use_container_width=True)
 
     with ic2:
         fig_immo_acces = px.scatter(
@@ -653,14 +650,15 @@ with tabs[4]:
             color="zone_short",
             color_discrete_map={"Critique": "#e74c3c", "Intermédiaire": "#f39c12", "Favorable": "#27ae60"},
             hover_name="Nom du département",
+            trendline="ols",
             title="Prix immobilier vs Temps d'accès aux soins",
             labels={"prix_m2_moyen": "Prix (€/m²)", "temps_acces_moyen": "Temps accès (min)", "zone_short": "Zone"},
         )
-        st.plotly_chart(fig_immo_acces,width="stretch")
+        st.plotly_chart(fig_immo_acces, use_container_width=True)
 
     # Top 10 prix par type
     st.markdown('<div class="section-title">🏙️ Prix par département — Maisons vs Appartements</div>', unsafe_allow_html=True)
-    immo_type = pd.read_csv("https://drive.google.com/uc?export=download&id=1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n", sep=";", low_memory=False)
+    immo_type = pd.read_csv("data/immobilier_2025.csv", sep=";", low_memory=False)
     immo_type["dept"] = immo_type["code_departement"].astype(str).str.zfill(2)
     immo_type_dept = immo_type.groupby(["dept", "nom_departement", "type_local"])["prix_m2"].mean().reset_index()
     immo_type_dept = immo_type_dept.merge(df[["dept", "zone_short"]], on="dept", how="left")
@@ -676,7 +674,7 @@ with tabs[4]:
         color_discrete_sequence=["#2980b9", "#27ae60"],
     )
     fig_immo_type.update_xaxes(tickangle=45)
-    st.plotly_chart(fig_immo_type, width="stretch")
+    st.plotly_chart(fig_immo_type, use_container_width=True)
 
     # Corrélation santé - immo
     st.markdown('<div class="section-title">📈 Corrélation Score Santé ↔ Marché Immobilier</div>', unsafe_allow_html=True)
@@ -693,7 +691,7 @@ with tabs[4]:
         labels=dict(color="Corrélation"),
     )
     fig_corr.update_layout(height=420)
-    st.plotly_chart(fig_corr, width="stretch")
+    st.plotly_chart(fig_corr, use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -799,7 +797,7 @@ with tabs[5]:
             title=f"Profil de {dept_choice} vs Moyenne nationale",
             height=380,
         )
-        st.plotly_chart(fig_detail_radar, width="stretch")
+        st.plotly_chart(fig_detail_radar, use_container_width=True)
 
     with ra2:
         # Recommandations
@@ -857,7 +855,7 @@ with tabs[5]:
             }
         ))
         fig_gauge.update_layout(height=240, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(fig_gauge, width="stretch")
+        st.plotly_chart(fig_gauge, use_container_width=True)
 
     # Classement comparatif
     st.markdown("---")
@@ -875,7 +873,7 @@ with tabs[5]:
     for col in ["Score /100", "Accès (min)", "Pros/100k", "Enviro/20"]:
         if col in priority_df.columns:
             priority_df[col] = pd.to_numeric(priority_df[col], errors="coerce").round(1)
-    st.dataframe(priority_df.set_index("Rang"), width="stretch")
+    st.dataframe(priority_df.set_index("Rang"), use_container_width=True)
 
 
 # ─── FOOTER ────────────────────────────────────────────────────────────────────
@@ -887,3 +885,6 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True
 )
+
+
+
