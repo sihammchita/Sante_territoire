@@ -78,7 +78,7 @@ st.markdown("""
 
 
 # ─── DATA LOADING ──────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner="Chargement des données…")
+@st.cache_data(ttl=3600, show_spinner="Chargement des données…")
 def load_all_data():
     base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data") + "/"
 
