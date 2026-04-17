@@ -154,7 +154,7 @@ def load_all_data():
     del temps_raw
 
     # ── Immobilier — SEULEMENT les colonnes nécessaires ──────────────────────
-      immo_raw = download_drive_csv(
+    immo_raw = download_drive_csv(
         "1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n",
         usecols=[
             "code_departement",
