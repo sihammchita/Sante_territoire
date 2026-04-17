@@ -154,27 +154,42 @@ def load_all_data():
     del temps_raw
 
     # ── Immobilier — SEULEMENT les colonnes nécessaires ──────────────────────
-    immo_raw = download_drive_csv(
+      immo_raw = download_drive_csv(
         "1Psjk6nf41I_X4dnFE0kgXpCNN5is4s9n",
-        usecols=["code_departement", "prix_m2", "valeur_fonciere", "surface_m2", "nom_departement", "type_local"],
+        usecols=[
+            "code_departement",
+            "commune",
+            "prix_m2",
+            "valeur_fonciere",
+            "surface_m2",
+            "nom_departement",
+            "type_local"
+        ],
         low_memory=False
     )
+    
+    # format dept
     immo_raw["dept"] = immo_raw["code_departement"].astype(str).str.zfill(2)
+    
+    # agrégation département
     immo_dept = immo_raw.groupby("dept").agg(
         prix_m2_moyen=("prix_m2", "mean"),
         nb_transactions=("valeur_fonciere", "count"),
         surface_moy=("surface_m2", "mean"),
     ).reset_index()
-    # Garder immo_raw en mémoire pour l'onglet immobilier (mais allégé)
+    
+    # dataset type
     immo_type = immo_raw[["dept", "nom_departement", "type_local", "prix_m2"]].copy()
+    
+    # dataset commune
     immo_commune = immo_raw[[
-    "code_departement",
-    "commune",
-    "prix_m2",
-    "valeur_fonciere"
+        "code_departement",
+        "commune",
+        "prix_m2",
+        "valeur_fonciere"
     ]].copy()
+    
     del immo_raw
-
     # ── Environnement ────────────────────────────────────────────────────────
     env = download_drive_csv("1rfdxUJDSX5HzHStZgl5LTUPBoGF9V2i4")
     env.columns = ["Code_region", "nom_region", "enviro_score"]
