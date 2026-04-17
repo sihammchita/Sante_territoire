@@ -633,7 +633,7 @@ with tabs[3]:
             title="Top 10 domaines médicaux touchés",
             labels={"count": "Nb médicaments", "Domaine(s) médical(aux)": ""},
         )
-        st.plotly_chart(fig_dom, width="stretch"
+        st.plotly_chart(fig_dom, width="stretch")
 
     st.markdown('<div class="section-title">📋 Détail des médicaments en tension / rupture</div>', unsafe_allow_html=True)
     filter_statut = st.multiselect(
